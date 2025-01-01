@@ -190,5 +190,3 @@ flowchart LR
 
 ---
 
-### Let us know if you'd like more examples, or diagrams or want to dive deeper into a specific strategy!
-![Uploading image.png…]()
