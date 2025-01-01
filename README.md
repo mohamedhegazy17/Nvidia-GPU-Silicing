@@ -1,31 +1,16 @@
-# Understanding NVIDIA GPU Sharing: Time-Slicing vs. MIG
+# Understanding NVIDIA GPU Sharing: MIG
 
-This document summarizes the concepts of NVIDIA GPU **Time-Slicing** and **MIG (Multi-Instance GPU)**, along with strategies and configurations for optimal GPU utilization. It also includes diagrams and a clean structure to make it easy to understand.
+This document summarizes the concepts of NVIDIA GPU **MIG (Multi-Instance GPU)**, along with strategies and configurations for optimal GPU utilization. It also includes diagrams and a clean structure to make it easy to understand.
 
 ---
 
 ## Table of Contents
 
-1. [What is Time-Slicing?](#what-is-time-slicing)
-2. [What is MIG (Multi-Instance GPU)?](#what-is-mig-multi-instance-gpu)
-3. [Key Differences Between Time-Slicing and MIG](#key-differences-between-time-slicing-and-mig)
-4. [MIG Strategies](#mig-strategies)
-5. [Diagrams](#diagrams)
-6. [When to Use Time-Slicing vs. MIG](#when-to-use-time-slicing-vs-mig)
-
----
-
-## What is Time-Slicing?
-
-**Time-Slicing** is a GPU sharing mechanism where the GPU alternates access across multiple workloads in quick succession. Each workload gets a time slice to utilize the GPU.
-
-### Key Features:
-- **Shared Resources:** The full GPU is used by one workload at a time.
-- **Dynamic Allocation:** Suitable for general-purpose workloads.
-- **Context Switching Overhead:** Performance may degrade for latency-sensitive tasks.
-
-### Use Case:
-- General-purpose tasks like virtual desktops, gaming, or lightweight AI inference.
+1. [What is MIG (Multi-Instance GPU)?](#what-is-mig-multi-instance-gpu)
+2. [Key Features of MIG](#key-features-of-mig)
+3. [MIG Strategies](#mig-strategies)
+4. [Diagrams](#diagrams)
+5. [When to Use MIG](#when-to-use-mig)
 
 ---
 
@@ -44,16 +29,16 @@ This document summarizes the concepts of NVIDIA GPU **Time-Slicing** and **MIG (
 
 ---
 
-## Key Differences Between Time-Slicing and MIG
+## Key Features of MIG
 
-| **Aspect**                  | **Time-Slicing**                         | **MIG**                                   |
-|-----------------------------|------------------------------------------|------------------------------------------|
-| **Resource Sharing**        | Alternates access over time.             | Physically partitions the GPU.           |
-| **Concurrency**             | One workload at a time.                  | Multiple workloads run concurrently.     |
-| **Isolation**               | No isolation between workloads.          | Strong hardware-level isolation.         |
-| **Performance**             | Can degrade due to context switching.    | Consistent and predictable performance.  |
-| **Overhead**                | Higher due to frequent switching.        | Minimal overhead.                        |
-| **Use Case**                | General-purpose workloads.               | Resource-intensive or multi-tenant tasks.|
+| **Aspect**                  | **Description**                          |
+|-----------------------------|------------------------------------------|
+| **Resource Sharing**        | Physically partitions the GPU.           |
+| **Concurrency**             | Multiple workloads run concurrently.     |
+| **Isolation**               | Strong hardware-level isolation.         |
+| **Performance**             | Consistent and predictable performance.  |
+| **Overhead**                | Minimal overhead.                        |
+| **Use Case**                | Resource-intensive or multi-tenant tasks.|
 
 ---
 
@@ -100,20 +85,7 @@ Fully customized configuration tailored to workload requirements.
 
 ## Diagrams
 
-### Time-Slicing vs. MIG Resource Sharing
-
-```mermaid
-gantt
-title GPU Resource Sharing
-section Time-Slicing
-Workload A    :active,  a1, 2023-01-01, 2023-01-05
-Workload B    :active,  a2, 2023-01-06, 2023-01-10
-section MIG
-MIG Instance 1 (1g.10gb) :active,  b1, 2023-01-01, 2023-01-10
-MIG Instance 2 (2g.20gb) :active,  b2, 2023-01-01, 2023-01-10
-```
-
-### Mixed Strategy Example
+### MIG Resource Sharing Example
 
 ```mermaid
 pie
@@ -125,12 +97,7 @@ title MIG Allocation (Mixed Strategy)
 
 ---
 
-## When to Use Time-Slicing vs. MIG
-
-### Use **Time-Slicing** When:
-- Workloads are lightweight and don’t require dedicated GPU resources.
-- You need flexibility for dynamic allocation.
-- Tasks include virtual desktops, gaming, or non-AI workloads.
+## When to Use MIG
 
 ### Use **MIG** When:
 - Workloads require strict isolation or predictable performance.
