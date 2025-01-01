@@ -185,7 +185,7 @@ flowchart LR
 
 ### Use **MIG** When:
 - Workloads require strict isolation or predictable performance.
-- You’re in a multi-tenant environment (e.g., Kubernetes or cloud setups).
+- You’re in a multi-tenant environment (e.g., OpenShift or cloud setups).
 - Tasks include AI inference or distributed training.
 
 ---
