@@ -1,34 +1,18 @@
-# Understanding NVIDIA GPU Sharing: Time-Slicing vs. MIG
+# Understanding NVIDIA MIG (Multi-Instance GPU)
 
-This document summarizes the concepts of NVIDIA GPU **Time-Slicing** and **MIG (Multi-Instance GPU)**, along with strategies and configurations for optimal GPU utilization. It also includes diagrams and a clean structure to make it easy to understand.
+This document provides an in-depth overview of NVIDIA's Multi-Instance GPU (MIG) technology, including strategies for resource allocation, detailed explanations of configurations, and diagrams for better understanding.
 
 ---
 
 ## Table of Contents
 
-1. [What is Time-Slicing?](#what-is-time-slicing)
-2. [What is MIG (Multi-Instance GPU)?](#what-is-mig-multi-instance-gpu)
-3. [Key Differences Between Time-Slicing and MIG](#key-differences-between-time-slicing-and-mig)
-4. [MIG Strategies](#mig-strategies)
-5. [Types of NVIDIA MIG Profiles](#types-of-nvidia-mig-profiles)
-6. [Common MIG Profiles and Their Uses](#common-mig-profiles-and-their-uses)
-7. [What Does 1/7th Mean for GPU?](#what-does-17th-mean-for-gpu)
-8. [Diagrams](#diagrams)
-9. [When to Use Time-Slicing vs. MIG](#when-to-use-time-slicing-vs-mig)
-
----
-
-## What is Time-Slicing?
-
-**Time-Slicing** is a GPU sharing mechanism where the GPU alternates access across multiple workloads in quick succession. Each workload gets a time slice to utilize the GPU.
-
-### Key Features:
-- **Shared Resources:** The full GPU is used by one workload at a time.
-- **Dynamic Allocation:** Suitable for general-purpose workloads.
-- **Context Switching Overhead:** Performance may degrade for latency-sensitive tasks.
-
-### Use Case:
-- General-purpose tasks like virtual desktops, gaming, or lightweight AI inference.
+1. [What is MIG (Multi-Instance GPU)?](#what-is-mig-multi-instance-gpu)
+2. [MIG Strategies](#mig-strategies)
+3. [Types of NVIDIA MIG Profiles](#types-of-nvidia-mig-profiles)
+4. [Common MIG Profiles and Their Uses](#common-mig-profiles-and-their-uses)
+5. [Detailed Explanation of 1 x 3g.40gb](#detailed-explanation-of-1-x-3g40gb)
+6. [What Does 1/7th Mean for GPU?](#what-does-17th-mean-for-gpu)
+7. [Diagrams](#diagrams)
 
 ---
 
@@ -44,19 +28,6 @@ This document summarizes the concepts of NVIDIA GPU **Time-Slicing** and **MIG (
 ### Use Case:
 - Resource-intensive tasks like AI inference or distributed training.
 - Multi-tenant environments with predictable performance requirements.
-
----
-
-## Key Differences Between Time-Slicing and MIG
-
-| **Aspect**                  | **Time-Slicing**                         | **MIG**                                   |
-|-----------------------------|------------------------------------------|------------------------------------------|
-| **Resource Sharing**        | Alternates access over time.             | Physically partitions the GPU.           |
-| **Concurrency**             | One workload at a time.                  | Multiple workloads run concurrently.     |
-| **Isolation**               | No isolation between workloads.          | Strong hardware-level isolation.         |
-| **Performance**             | Can degrade due to context switching.    | Consistent and predictable performance.  |
-| **Overhead**                | Higher due to frequent switching.        | Minimal overhead.                        |
-| **Use Case**                | General-purpose workloads.               | Resource-intensive or multi-tenant tasks.|
 
 ---
 
@@ -125,6 +96,20 @@ MIG profiles define how GPU resources are divided. Each profile specifies the nu
 
 ---
 
+## Detailed Explanation of 1 x 3g.40gb
+
+### What Does Each Value Mean?
+- **1:** Refers to the number of MIG instances being created (1 instance).
+- **3g:** Indicates that this instance will use 3 GPU slices.
+- **40gb:** Specifies that this instance has 40 GB of dedicated GPU memory.
+
+### Key Details:
+- A **single MIG instance** is created using **3 slices** of the GPU’s available 7 slices.
+- **40 GB memory** is allocated exclusively to this instance.
+- The remaining 4 slices can be allocated to other MIG instances, or left unused, depending on the chosen strategy.
+
+---
+
 ## What Does 1/7th Mean for GPU?
 
 The term **1/7th** refers to the fraction of the GPU's total compute and memory resources allocated to a single slice when using the MIG feature. NVIDIA GPUs that support MIG can be split into a maximum of 7 slices.
@@ -138,19 +123,6 @@ This ensures efficient partitioning of resources for multiple applications.
 ---
 
 ## Diagrams
-
-### Time-Slicing vs. MIG Resource Sharing
-
-```mermaid
-gantt
-title GPU Resource Sharing
-section Time-Slicing
-Workload A    :active,  a1, 2023-01-01, 2023-01-05
-Workload B    :active,  a2, 2023-01-06, 2023-01-10
-section MIG
-MIG Instance 1 (1g.10gb) :active,  b1, 2023-01-01, 2023-01-10
-MIG Instance 2 (2g.20gb) :active,  b2, 2023-01-01, 2023-01-10
-```
 
 ### Mixed Strategy Example
 
@@ -174,20 +146,16 @@ flowchart LR
     B --> C5[Remaining Slices]
 ```
 
----
+### 1 x 3g.40gb Configuration
 
-## When to Use Time-Slicing vs. MIG
-
-### Use **Time-Slicing** When:
-- Workloads are lightweight and don’t require dedicated GPU resources.
-- You need flexibility for dynamic allocation.
-- Tasks include virtual desktops, gaming, or non-AI workloads.
-
-### Use **MIG** When:
-- Workloads require strict isolation or predictable performance.
-- You’re in a multi-tenant environment (e.g., Kubernetes or cloud setups).
-- Tasks include AI inference or distributed training.
+```mermaid
+flowchart TB
+    A[Physical GPU] --> B[7 GPU Slices]
+    B --> C1[1 MIG Instance (3g.40gb)]
+    C1 --> D[3 Slices Allocated]
+    B --> C2[Remaining 4 Slices]
+```
 
 ---
 
-### Let us know if you'd like more examples, or diagrams or want to dive deeper into a specific strategy!
+Let us know if you’d like further clarifications or additional diagrams!
